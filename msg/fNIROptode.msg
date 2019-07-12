@@ -1,0 +1,3 @@
+int32 raw_730nm
+int32 raw_ambient
+int32 raw_850nm
