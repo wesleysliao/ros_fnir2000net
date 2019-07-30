@@ -16,7 +16,7 @@ except:
 
 BUFFER_SIZE = 654
 
-#initialze connectino to COBI Studio
+#initialze connection to COBI Studio
 cobi_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 cobi_socket.connect((COBI_Studio_IP, COBI_Studio_PORT))
 
@@ -24,11 +24,9 @@ cobi_socket.connect((COBI_Studio_IP, COBI_Studio_PORT))
 cobi_socket.sendall(b'u')
 
 #initialize ROS node and publisher
-pub = rospy.Publisher('fnir', fNIRArray, queue_size = 10)
+pub = rospy.Publisher('fnir2000', fNIRArray, queue_size = 10)
 rospy.init_node('fnir2000_node', anonymous = True)
 
-def fnir_sender():
-    
 while True:
     try:
         data = cobi_socket.recv(BUFFER_SIZE)
@@ -40,15 +38,14 @@ while True:
             raw_ambient = data_unpacked[index_offset+1]
             raw_850nm = data_unpacked[index_offset+2]
             
-            fnir_data = [optode, raw_730nm, raw_ambient, raw_850nm]
-            print(fnir_data)
-
-        fnirmsg = fNIROptode(raw_730nm = raw_730nm,
-                             raw_ambient = raw_ambient,
-                             raw_850nm = raw_850nm)
-        pub.publish(fnirmsg)
+            optodelist.append(fNIROptode(raw_730nm = raw_730nm,
+                                         raw_ambient = raw_ambient,
+                                         raw_850nm = raw_850nm)
+        pub.publish(fNIRArray(
+                        rospy.Time.now(),
+                        tuple(optodelist)))
  
     except Exception as error:
         print error
                
-s.close()
+cobi_socket.close()
