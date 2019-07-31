@@ -40,10 +40,12 @@ while True:
             
             optodelist.append(fNIROptode(raw_730nm = raw_730nm,
                                          raw_ambient = raw_ambient,
-                                         raw_850nm = raw_850nm)
+                                         raw_850nm = raw_850nm))
         pub.publish(fNIRArray(
-                        rospy.Time.now(),
-                        tuple(optodelist)))
+                        stamp = rospy.Time.now(),
+                        optodes = tuple(optodelist)
+                              )
+                    )
  
     except Exception as error:
         print error
