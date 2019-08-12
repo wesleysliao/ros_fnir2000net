@@ -27,25 +27,28 @@ cobi_socket.sendall(b'u')
 pub = rospy.Publisher('fnir2000', fNIRArray, queue_size = 10)
 rospy.init_node('fnir2000_node', anonymous = True)
 
-while True:
+while not rospy.is_shutdown():
     try:
         data = cobi_socket.recv(BUFFER_SIZE)
-        data_unpacked = struct.unpack_from('<B54f', data)     
+        print(len(data))
         
-        optodelist = []
-        for optode, index_offset in enumerate(range(1, 54, 3), start=1):
-            raw_730nm = data_unpacked[index_offset]
-            raw_ambient = data_unpacked[index_offset+1]
-            raw_850nm = data_unpacked[index_offset+2]
+        if len(data) > 1:
+            data_unpacked = struct.unpack_from('<B54f', data)     
             
-            optodelist.append(fNIROptode(raw_730nm = raw_730nm,
-                                         raw_ambient = raw_ambient,
-                                         raw_850nm = raw_850nm))
-        pub.publish(fNIRArray(
-                        stamp = rospy.Time.now(),
-                        optodes = tuple(optodelist)
-                              )
-                    )
+            optodelist = []
+            for optode, index_offset in enumerate(range(1, 54, 3), start=1):
+                raw_730nm = data_unpacked[index_offset]
+                raw_ambient = data_unpacked[index_offset+1]
+                raw_850nm = data_unpacked[index_offset+2]
+                
+                optodelist.append(fNIROptode(raw_730nm = raw_730nm,
+                                             raw_ambient = raw_ambient,
+                                             raw_850nm = raw_850nm))
+            pub.publish(fNIRArray(
+                            stamp = rospy.Time.now(),
+                            optodes = tuple(optodelist)
+                                  )
+                        )
  
     except Exception as error:
         print error
